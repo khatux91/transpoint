@@ -123,13 +123,13 @@ class MyFrame(wx.Frame):
         self.toolbar.AddSeparator()
         
         self.toolbar.AddSimpleTool(ID_SELECT,
-                                   wx.Bitmap("select.png", wx.BITMAP_TYPE_PNG), 
+                                   wx.Bitmap("Images/select.png", wx.BITMAP_TYPE_PNG), 
                                    "Select")                
         self.toolbar.AddSimpleTool(ID_CONVERT,
-                                   wx.Bitmap("convert.bmp", wx.BITMAP_TYPE_BMP),
+                                   wx.Bitmap("Images/convert.bmp", wx.BITMAP_TYPE_BMP),
                                    "Convert")
         self.toolbar.AddSimpleTool(ID_INVERT,
-                                   wx.Bitmap("invert.bmp", wx.BITMAP_TYPE_BMP), 
+                                   wx.Bitmap("Images/invert.bmp", wx.BITMAP_TYPE_BMP), 
                                    "Convert and Invert")
         
         self.toolbar.AddSeparator()
@@ -334,7 +334,7 @@ class MyFrame(wx.Frame):
             
             imDisplay = self.ScaleImage(self.im,DEFAULT_WIDTH,DEFAULT_HEIGHT)
            
-            bg = Image.open("bg.png",'r')
+            bg = Image.open("Images/bg.png",'r')
             bg.paste(imDisplay,(0,0),imDisplay)
             imDisplay = bg
             
