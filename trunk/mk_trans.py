@@ -13,9 +13,12 @@ ABOUT_TITLE    = "About"
 ABOUT_BODY     = "A simple application to make image background \n" \
             "transparent for incorporation into presentation slides \n" \
             "Author: Raja S. May 2007 \n rajajs@gmail.com"
+HELP_TITLE = "For FAQs see this link"
+HELP_BODY  =    "http://code.google.com/p/transpoint/"
 
 ID_APP         = wx.NewId()
 ID_ABOUT       = wx.NewId()
+ID_HELP        = wx.NewId()
 ID_DISPLAY     = wx.NewId()
 ID_SELECT      = wx.NewId()
 ID_SAVE        = wx.NewId()
@@ -69,11 +72,12 @@ class CustomStatusBar(wx.StatusBar):
 
 class MyFrame(wx.Frame):
     def __init__(self, parent, id, title):
-
-        self.__lastdir__ = os.getcwd() 
-        self.r1 = 255; self.g1 = 255; self.b1 = 255 #initial values for color to remove (white)
         
-        wx.Frame.__init__(self, parent, ID_APP, title,wx.DefaultPosition,wx.Size(DEFAULT_WIDTH, DEFAULT_HEIGHT))
+        self.r1 = 255; self.g1 = 255; self.b1 = 255 #initial values for color to remove (white)
+        ### No resizing of frame
+        wx.Frame.__init__(self, parent, ID_APP, title,wx.DefaultPosition,wx.Size(DEFAULT_WIDTH, DEFAULT_HEIGHT),
+        wx.DEFAULT_FRAME_STYLE & ~ (wx.MINIMIZE_BOX | wx.RESIZE_BOX | wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
+        
         self.sb = CustomStatusBar(self)
         self.SetStatusBar(self.sb)
         self.sb.SetSelectedColor(wx.Color(self.r1,self.g1,self.b1))
@@ -100,6 +104,7 @@ class MyFrame(wx.Frame):
         
         HelpMenu = wx.Menu()
         HelpMenu.Append(ID_ABOUT,"&About","More information about this program")
+        HelpMenu.Append(ID_HELP,"&Help","Help on using this program")
 
         menuBar = wx.MenuBar()
         menuBar.Append(FileMenu, "&File");
@@ -110,38 +115,30 @@ class MyFrame(wx.Frame):
         self.SetMenuBar(menuBar)
         
         tsize = (16,16)
-        
-        self.toolbar = self.CreateToolBar(wx.TB_HORIZONTAL |
-                                          wx.NO_BORDER | wx.TB_FLAT)
+        self.toolbar = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT)
 
-        self.toolbar.AddSimpleTool(ID_DISPLAY,
-                                   wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, tsize),
-                                   "Open")
-        self.toolbar.AddSimpleTool(ID_SAVE,
-                                   wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR, tsize),
-                                   "Save")
+        self.toolbar.AddSimpleTool(ID_DISPLAY,wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN,
+                                   wx.ART_TOOLBAR, tsize),"Open")
+        self.toolbar.AddSimpleTool(ID_SAVE,wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE,
+                                   wx.ART_TOOLBAR, tsize), "Save")
         self.toolbar.AddSeparator()
         
-        self.toolbar.AddSimpleTool(ID_SELECT,
-                                   wx.Bitmap("Images/select.png", wx.BITMAP_TYPE_PNG), 
-                                   "Select")                
-        self.toolbar.AddSimpleTool(ID_CONVERT,
-                                   wx.Bitmap("Images/convert.bmp", wx.BITMAP_TYPE_BMP),
-                                   "Convert")
-        self.toolbar.AddSimpleTool(ID_INVERT,
-                                   wx.Bitmap("Images/invert.bmp", wx.BITMAP_TYPE_BMP), 
-                                   "Convert and Invert")
-        
+        self.toolbar.AddSimpleTool(ID_SELECT, wx.Bitmap("Images/select.png", 
+                                   wx.BITMAP_TYPE_PNG), "Select")                
+        self.toolbar.AddSimpleTool(ID_CONVERT, wx.Bitmap("Images/convert.bmp", 
+                                   wx.BITMAP_TYPE_BMP),"Convert")
+        self.toolbar.AddSimpleTool(ID_INVERT,wx.Bitmap("Images/invert.bmp",
+                                   wx.BITMAP_TYPE_BMP), "Convert and Invert")
         self.toolbar.AddSeparator()
-        self.toolbar.AddSimpleTool(ID_EXIT,
-                           wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, tsize),
-                           "Exit")
-
+        
+        self.toolbar.AddSimpleTool(ID_EXIT,wx.ArtProvider.GetBitmap(wx.ART_QUIT,
+                                   wx.ART_TOOLBAR, tsize),"Exit")
         self.toolbar.Realize()
 
-        self.__panel__ = wx.Panel(self)
+        self.panel = wx.Panel(self)
 
         wx.EVT_MENU(self, ID_ABOUT,   self.About)
+        wx.EVT_MENU(self, ID_HELP,    self.Help)
         wx.EVT_MENU(self, ID_DISPLAY, self.DisplayImage)
         wx.EVT_MENU(self, ID_EXIT,    self.Quit)
         wx.EVT_MENU(self, ID_SELECT,  self.SelectColor)
@@ -154,7 +151,7 @@ class MyFrame(wx.Frame):
         wx.EVT_MENU(self, ID_RESIZE, self.Resize)
         wx.EVT_MENU(self, ID_NORESIZE, self.Noresize)
         
-        
+        self.lastdir = os.getcwd() 
         self.SELECT_FLAG = "FALSE"  #flag determines if mouse click must be processed
         self.IMAGE_SELECTED = "FALSE" #flags image selection
         self.IMAGE_CONVERTED = "FALSE" #flags image conversion
@@ -174,21 +171,21 @@ class MyFrame(wx.Frame):
 
     def About(self, event):
         self.Alert(ABOUT_TITLE,ABOUT_BODY)
+        
+    def Help(self, event):
+        self.Alert(HELP_TITLE,HELP_BODY)
     
     def Quit(self, event):
         self.Close(1)
         
     def LowThresh(self,event):
         self.Threshold = 6
-        #print "Low"
         
     def MediumThresh(self,event):
         self.Threshold = 15
-        #print "Medium"
 
     def HighThresh(self,event):
         self.Threshold = 36
-        #print "High"
         
     def Resize(self,event):
         self.RESIZE_FLAG = "TRUE"   
@@ -199,16 +196,13 @@ class MyFrame(wx.Frame):
     def ScaleImage(self,im,width,height): #scale image to smaller than w x h, but maintain aspect ratio
         AspectRatio = width/height
         w,h = im.size
- #       print im.size
         hNorm = h/AspectRatio
         if hNorm < w:
             ShrinkRatio = w/width
         else:
             ShrinkRatio = h/height
-#        print ShrinkRatio
         if ShrinkRatio > 1:
             im = im.resize((int(w/ShrinkRatio),int(h/ShrinkRatio)))
-  #      print im.size
         return im
         
     def DisplayImage(self,event):
@@ -222,22 +216,21 @@ class MyFrame(wx.Frame):
            return 0
         self.IMAGE_SELECTED = "TRUE"
         
-        self.__lastdir__ = os.path.dirname(img)
+        self.lastdir = os.path.dirname(img)
         self.SetStatusText(os.path.basename(img))
 
         if self.BITMAP_FLAG == "exists":
             self.StaticBitmap.SetBitmap(bmp)
-#            print "bitmap updated"
+
         else:
-            self.StaticBitmap = wx.StaticBitmap(self.__panel__,-1,bmp,wx.Point(0,0),
+            self.StaticBitmap = wx.StaticBitmap(self.panel,-1,bmp,wx.Point(0,0),
              wx.Size(DEFAULT_WIDTH,DEFAULT_HEIGHT))
             self.BITMAP_FLAG = "exists"
-#            print "bitmap created"
                 
         wx.EVT_LEFT_UP(self.StaticBitmap, self.OnButtonUp) #mouse left button up is bound to bitmap
 
     def ChooseImage(self):
-        dlg = ImageDialog(self,self.__lastdir__);
+        dlg = ImageDialog(self,self.lastdir)
         if dlg.ShowModal() == wx.ID_OK:
            return dlg.GetFile()
 
@@ -268,16 +261,10 @@ class MyFrame(wx.Frame):
         self.im_original = Image.open( img, 'r')
         if self.RESIZE_FLAG == "TRUE":
             self.im_original = self.ScaleImage(self.im_original,self.SlideWidth,self.SlideHeight)
-        #self.imsmall = self.im_original.resize((DEFAULT_WIDTH,DEFAULT_HEIGHT))
-#        print "before ",self.im_original.size
         self.imsmall = self.ScaleImage(self.im_original,DEFAULT_WIDTH,DEFAULT_HEIGHT)
-        #print "before ",self.imsmall.mode
-#        print self.imsmall.size
         self.imsmall.convert("RGB") #if it is in greyscale
-        #print "after ",self.imsmall.mode
         image = apply( wx.EmptyImage, self.imsmall.size )
         image.SetData( self.imsmall.convert( "RGB").tostring() )
-        #image.SetAlphaData(self.imsmall.convert("RGBA").tostring()[3::4])
         return image.ConvertToBitmap() # wxBitmapFromImage(image)
     
     def SelectColor(self,event):
@@ -287,24 +274,20 @@ class MyFrame(wx.Frame):
             self.Alert("Warning","Figure processed already, reopen image or open new image")
         else:
             self.SELECT_FLAG = 1
-            self.__panel__.SetCursor(wx.StockCursor(wx.CURSOR_CROSS))
+            self.panel.SetCursor(wx.StockCursor(wx.CURSOR_CROSS))
         
     def OnButtonUp(self,event):
         pt = event.GetPosition()
                        
         if self.SELECT_FLAG == 1:
-#            print self.imsmall.mode
-                        
-            #if the original image is RGBA, imsmall is still RGBA - therefore...
             try:
                 self.r1,self.g1,self.b1 = self.imsmall.getpixel((pt.x,pt.y))
             except ValueError:
                 self.r1,self.g1,self.b1,dummy = self.imsmall.getpixel((pt.x,pt.y))
                 
             self.sb.SetSelectedColor(wx.Color(self.r1,self.g1,self.b1))
-            #print "selected coords ",self.xcoord,self.ycoord
             self.SELECT_FLAG = 0
-            self.__panel__.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+            self.panel.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
     def Invert(self,event):
         self.ConvertTrans(self,"invert")
