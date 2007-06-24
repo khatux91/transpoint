@@ -18,7 +18,7 @@ HELP_BODY  =    "http://code.google.com/p/transpoint/"
 
 ID_APP         = wx.NewId()
 ID_ABOUT       = wx.NewId()
-ID_HELP        = wx.NewId()
+ID_FAQ       = wx.NewId()
 ID_DISPLAY     = wx.NewId()
 ID_SELECT      = wx.NewId()
 ID_SAVE        = wx.NewId()
@@ -104,7 +104,7 @@ class MyFrame(wx.Frame):
         
         HelpMenu = wx.Menu()
         HelpMenu.Append(ID_ABOUT,"&About","More information about this program")
-        HelpMenu.Append(ID_HELP,"&Help","Help on using this program")
+        HelpMenu.Append(ID_FAQ,"&FAQ","Help on using this program")
 
         menuBar = wx.MenuBar()
         menuBar.Append(FileMenu, "&File");
@@ -138,7 +138,7 @@ class MyFrame(wx.Frame):
         self.panel = wx.Panel(self)
 
         wx.EVT_MENU(self, ID_ABOUT,   self.About)
-        wx.EVT_MENU(self, ID_HELP,    self.Help)
+        wx.EVT_MENU(self, ID_FAQ,    self.Help)
         wx.EVT_MENU(self, ID_DISPLAY, self.DisplayImage)
         wx.EVT_MENU(self, ID_EXIT,    self.Quit)
         wx.EVT_MENU(self, ID_SELECT,  self.SelectColor)
