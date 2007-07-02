@@ -2,12 +2,6 @@
 
 Transpoint helps you convert a uniform background in an image or chart to transparency so that you when you insert it into a presentation slide or in your webpage, it takes the background color of the slide or page.
 
-*How should I install this?*
-
-The windows binary can be downloaded as a binary (sorry, no installer yet). Just download it, unzip and run transpoint.exe. 
-
-Versions for Linux are in the making and will be available soon.
-
 *How do I use this?*
 
 Simple. Just open an image (most formats will work), use 'select color' (the dropper icon) to select the color you want removed, click on 'convert' and sit back and wait. Once the conversion is done, you can save using 'save' in the menu or toolbar.
